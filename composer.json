@@ -3,7 +3,8 @@
   "description": "Shadowsocks Origin",
   "license": "MIT",
   "require": {
-    "php": "^8.1"
+    "php": "^8.1",
+    "ext-filter": "*"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.1",
