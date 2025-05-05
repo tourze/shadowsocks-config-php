@@ -9,10 +9,6 @@ namespace Shadowsocks\Config;
  */
 class ClientConfig extends BaseConfig
 {
-    /**
-     * 本地端口号
-     */
-    private readonly int $localPort;
 
     /**
      * 创建配置实例
@@ -24,15 +20,14 @@ class ClientConfig extends BaseConfig
      * @param string $method 加密方法
      */
     public function __construct(
-        string $server,
-        int $serverPort,
-        int $localPort = 1080,
-        string $password = '',
-        string $method = 'chacha20-ietf-poly1305'
+        string               $server,
+        int                  $serverPort,
+        private readonly int $localPort = 1080,
+        string               $password = '',
+        string               $method = 'chacha20-ietf-poly1305'
     )
     {
         parent::__construct($server, $serverPort, $password, $method);
-        $this->localPort = $localPort;
     }
 
     /**

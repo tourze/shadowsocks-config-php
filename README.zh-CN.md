@@ -232,21 +232,21 @@ SIP008 定义了一种标准的 JSON 文档格式，用于在线配置共享和�
 
 ```json
 {
-    "version": 1,
-    "servers": [
-        {
-            "id": "服务器uuid",
-            "remarks": "服务器名称",
-            "server": "example.com",
-            "server_port": 8388,
-            "password": "密码",
-            "method": "aes-256-gcm",
-            "plugin": "插件名称",
-            "plugin_opts": "插件选项"
-        }
-    ],
-    "bytes_used": 274877906944,
-    "bytes_remaining": 824633720832
+  "version": 1,
+  "servers": [
+    {
+      "id": "服务器uuid",
+      "remarks": "服务器名称",
+      "server": "example.com",
+      "server_port": 8388,
+      "password": "密码",
+      "method": "aes-256-gcm",
+      "plugin": "插件名称",
+      "plugin_opts": "插件选项"
+    }
+  ],
+  "bytes_used": 274877906944,
+  "bytes_remaining": 824633720832
 }
 ```
 

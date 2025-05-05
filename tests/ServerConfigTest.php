@@ -2,6 +2,7 @@
 
 namespace Shadowsocks\Config\Tests;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Shadowsocks\Config\ClientConfig;
 use Shadowsocks\Config\ServerConfig;
@@ -32,20 +33,20 @@ class ServerConfigTest extends TestCase
     {
         $id = '27b8a625-4f4b-4428-9f0f-8a2317db7c79';
         $serverConfig = new ServerConfig($id, 'example.com', 8388, 'password', 'aes-256-gcm');
-        
+
         $remarks = 'Test Server';
         $plugin = 'v2ray-plugin';
         $pluginOpts = 'server';
-        
+
         $serverConfig->setRemarks($remarks);
         $serverConfig->setPlugin($plugin);
         $serverConfig->setPluginOpts($pluginOpts);
-        
+
         $this->assertEquals($remarks, $serverConfig->getRemarks());
         $this->assertEquals($plugin, $serverConfig->getPlugin());
         $this->assertEquals($pluginOpts, $serverConfig->getPluginOpts());
     }
-    
+
     public function testToConfig(): void
     {
         $id = '27b8a625-4f4b-4428-9f0f-8a2317db7c79';
@@ -54,12 +55,12 @@ class ServerConfigTest extends TestCase
         $password = 'password';
         $method = 'aes-256-gcm';
         $remarks = 'Test Server';
-        
+
         $serverConfig = new ServerConfig($id, $server, $serverPort, $password, $method);
         $serverConfig->setRemarks($remarks);
-        
+
         $config = $serverConfig->toConfig();
-        
+
         $this->assertInstanceOf(ClientConfig::class, $config);
         $this->assertEquals($server, $config->getServer());
         $this->assertEquals($serverPort, $config->getServerPort());
@@ -68,7 +69,7 @@ class ServerConfigTest extends TestCase
         $this->assertEquals($method, $config->getMethod());
         $this->assertEquals($remarks, $config->getTag());
     }
-    
+
     public function testToJson(): void
     {
         $id = '27b8a625-4f4b-4428-9f0f-8a2317db7c79';
@@ -79,15 +80,15 @@ class ServerConfigTest extends TestCase
         $remarks = 'Test Server';
         $plugin = 'v2ray-plugin';
         $pluginOpts = 'server';
-        
+
         $serverConfig = new ServerConfig($id, $server, $serverPort, $password, $method);
         $serverConfig->setRemarks($remarks);
         $serverConfig->setPlugin($plugin);
         $serverConfig->setPluginOpts($pluginOpts);
-        
+
         $json = $serverConfig->toJson();
         $data = json_decode($json, true);
-        
+
         $this->assertEquals($id, $data['id']);
         $this->assertEquals($server, $data['server']);
         $this->assertEquals($serverPort, $data['server_port']);
@@ -97,21 +98,21 @@ class ServerConfigTest extends TestCase
         $this->assertEquals($plugin, $data['plugin']);
         $this->assertEquals($pluginOpts, $data['plugin_opts']);
     }
-    
+
     public function testJsonWithoutOptionalFields(): void
     {
         $id = '27b8a625-4f4b-4428-9f0f-8a2317db7c79';
         $serverConfig = new ServerConfig($id, 'example.com', 8388, 'password', 'aes-256-gcm');
-        
+
         $json = $serverConfig->toJson();
         $data = json_decode($json, true);
-        
+
         $this->assertEquals($id, $data['id']);
         $this->assertArrayNotHasKey('remarks', $data);
         $this->assertArrayNotHasKey('plugin', $data);
         $this->assertArrayNotHasKey('plugin_opts', $data);
     }
-    
+
     public function testFromJson(): void
     {
         $jsonStr = <<<JSON
@@ -126,9 +127,9 @@ class ServerConfigTest extends TestCase
     "plugin_opts": "server"
 }
 JSON;
-        
+
         $serverConfig = ServerConfig::fromJson($jsonStr);
-        
+
         $this->assertEquals('27b8a625-4f4b-4428-9f0f-8a2317db7c79', $serverConfig->getId());
         $this->assertEquals('Test Server', $serverConfig->getRemarks());
         $this->assertEquals('example.com', $serverConfig->getServer());
@@ -138,7 +139,7 @@ JSON;
         $this->assertEquals('v2ray-plugin', $serverConfig->getPlugin());
         $this->assertEquals('server', $serverConfig->getPluginOpts());
     }
-    
+
     public function testFromJsonMissingRequiredFields(): void
     {
         $jsonStr = <<<JSON
@@ -147,8 +148,8 @@ JSON;
     "remarks": "Test Server"
 }
 JSON;
-        
-        $this->expectException(\InvalidArgumentException::class);
+
+        $this->expectException(InvalidArgumentException::class);
         ServerConfig::fromJson($jsonStr);
     }
 }

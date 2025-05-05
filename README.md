@@ -5,7 +5,8 @@
 [![Latest Version](https://img.shields.io/packagist/v/tourze/shadowsocks-config-php.svg?style=flat-square)](https://packagist.org/packages/tourze/shadowsocks-config-php)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 
-This package provides configuration classes for Shadowsocks services, supporting parsing and generating Shadowsocks configurations.
+This package provides configuration classes for Shadowsocks services, supporting parsing and generating Shadowsocks
+configurations.
 
 ## Features
 
@@ -235,21 +236,21 @@ SIP008 defines a standard JSON document format for online configuration sharing 
 
 ```json
 {
-    "version": 1,
-    "servers": [
-        {
-            "id": "server-uuid",
-            "remarks": "Server name",
-            "server": "example.com",
-            "server_port": 8388,
-            "password": "password",
-            "method": "aes-256-gcm",
-            "plugin": "plugin-name",
-            "plugin_opts": "plugin-options"
-        }
-    ],
-    "bytes_used": 274877906944,
-    "bytes_remaining": 824633720832
+  "version": 1,
+  "servers": [
+    {
+      "id": "server-uuid",
+      "remarks": "Server name",
+      "server": "example.com",
+      "server_port": 8388,
+      "password": "password",
+      "method": "aes-256-gcm",
+      "plugin": "plugin-name",
+      "plugin_opts": "plugin-options"
+    }
+  ],
+  "bytes_used": 274877906944,
+  "bytes_remaining": 824633720832
 }
 ```
 

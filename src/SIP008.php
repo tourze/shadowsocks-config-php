@@ -2,6 +2,8 @@
 
 namespace Shadowsocks\Config;
 
+use InvalidArgumentException;
+
 /**
  * SIP008在线配置传递处理类
  *
@@ -33,21 +35,57 @@ class SIP008
     private ?int $bytesRemaining = null;
 
     /**
+     * 从URL加载SIP008配置
+     *
+     * @param string $url HTTPS URL
+     * @return self
+     * @throws InvalidArgumentException 加载配置失败
+     */
+    public static function fromUrl(string $url): self
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new InvalidArgumentException('无效的URL');
+        }
+
+        if (!str_starts_with($url, 'https://')) {
+            throw new InvalidArgumentException('SIP008配置必须通过HTTPS传输');
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'header' => 'Accept: application/json',
+                'timeout' => 10.0,
+            ],
+            'ssl' => [
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+            ],
+        ]);
+
+        $content = file_get_contents($url, false, $context);
+        if ($content === false) {
+            throw new InvalidArgumentException('无法加载SIP008配置: ' . error_get_last()['message'] ?? '未知错误');
+        }
+
+        return self::fromJson($content);
+    }
+
+    /**
      * 解析SIP008 JSON文档
      *
      * @param string $jsonContent JSON内容
      * @return self
-     * @throws \InvalidArgumentException JSON格式错误
+     * @throws InvalidArgumentException JSON格式错误
      */
     public static function fromJson(string $jsonContent): self
     {
         $data = json_decode($jsonContent, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \InvalidArgumentException('SIP008 JSON格式错误: ' . json_last_error_msg());
+            throw new InvalidArgumentException('SIP008 JSON格式错误: ' . json_last_error_msg());
         }
 
         if (!isset($data['version']) || !isset($data['servers']) || !is_array($data['servers'])) {
-            throw new \InvalidArgumentException('无效的SIP008格式: 缺少必要字段或servers不是数组');
+            throw new InvalidArgumentException('无效的SIP008格式: 缺少必要字段或servers不是数组');
         }
 
         $sip008 = new self();
@@ -56,7 +94,7 @@ class SIP008
         foreach ($data['servers'] as $server) {
             if (!isset($server['id']) || !isset($server['server']) || !isset($server['server_port']) ||
                 !isset($server['password']) || !isset($server['method'])) {
-                throw new \InvalidArgumentException('无效的服务器配置: 缺少必要字段');
+                throw new InvalidArgumentException('无效的服务器配置: 缺少必要字段');
             }
 
             $serverConfig = new ServerConfig(
@@ -95,42 +133,6 @@ class SIP008
     }
 
     /**
-     * 从URL加载SIP008配置
-     *
-     * @param string $url HTTPS URL
-     * @return self
-     * @throws \InvalidArgumentException 加载配置失败
-     */
-    public static function fromUrl(string $url): self
-    {
-        if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new \InvalidArgumentException('无效的URL');
-        }
-
-        if (!str_starts_with($url, 'https://')) {
-            throw new \InvalidArgumentException('SIP008配置必须通过HTTPS传输');
-        }
-
-        $context = stream_context_create([
-            'http' => [
-                'header' => 'Accept: application/json',
-                'timeout' => 10.0,
-            ],
-            'ssl' => [
-                'verify_peer' => true,
-                'verify_peer_name' => true,
-            ],
-        ]);
-
-        $content = file_get_contents($url, false, $context);
-        if ($content === false) {
-            throw new \InvalidArgumentException('无法加载SIP008配置: ' . error_get_last()['message'] ?? '未知错误');
-        }
-
-        return self::fromJson($content);
-    }
-
-    /**
      * 添加服务器配置
      *
      * @param ServerConfig $server 服务器配置
@@ -148,70 +150,6 @@ class SIP008
 
         $this->servers[] = $server;
         return $this;
-    }
-
-    /**
-     * 设置已使用流量
-     *
-     * @param int $bytes 字节数
-     * @return $this
-     */
-    public function setBytesUsed(int $bytes): self
-    {
-        $this->bytesUsed = $bytes;
-        return $this;
-    }
-
-    /**
-     * 设置剩余流量
-     *
-     * @param int $bytes 字节数
-     * @return $this
-     */
-    public function setBytesRemaining(int $bytes): self
-    {
-        $this->bytesRemaining = $bytes;
-        return $this;
-    }
-
-    /**
-     * 获取服务器配置列表
-     *
-     * @return ServerConfig[]
-     */
-    public function getServers(): array
-    {
-        return $this->servers;
-    }
-
-    /**
-     * 获取已使用流量
-     *
-     * @return int|null
-     */
-    public function getBytesUsed(): ?int
-    {
-        return $this->bytesUsed;
-    }
-
-    /**
-     * 获取剩余流量
-     *
-     * @return int|null
-     */
-    public function getBytesRemaining(): ?int
-    {
-        return $this->bytesRemaining;
-    }
-
-    /**
-     * 获取文档版本
-     *
-     * @return int
-     */
-    public function getVersion(): int
-    {
-        return $this->version;
     }
 
     /**
@@ -299,6 +237,70 @@ class SIP008
         }
 
         return $sip008;
+    }
+
+    /**
+     * 获取服务器配置列表
+     *
+     * @return ServerConfig[]
+     */
+    public function getServers(): array
+    {
+        return $this->servers;
+    }
+
+    /**
+     * 获取已使用流量
+     *
+     * @return int|null
+     */
+    public function getBytesUsed(): ?int
+    {
+        return $this->bytesUsed;
+    }
+
+    /**
+     * 设置已使用流量
+     *
+     * @param int $bytes 字节数
+     * @return $this
+     */
+    public function setBytesUsed(int $bytes): self
+    {
+        $this->bytesUsed = $bytes;
+        return $this;
+    }
+
+    /**
+     * 获取剩余流量
+     *
+     * @return int|null
+     */
+    public function getBytesRemaining(): ?int
+    {
+        return $this->bytesRemaining;
+    }
+
+    /**
+     * 设置剩余流量
+     *
+     * @param int $bytes 字节数
+     * @return $this
+     */
+    public function setBytesRemaining(int $bytes): self
+    {
+        $this->bytesRemaining = $bytes;
+        return $this;
+    }
+
+    /**
+     * 获取文档版本
+     *
+     * @return int
+     */
+    public function getVersion(): int
+    {
+        return $this->version;
     }
 
     /**

@@ -9,27 +9,6 @@ namespace Shadowsocks\Config;
  */
 abstract class BaseConfig
 {
-    /**
-     * 服务器主机名或IP地址(IPv4/IPv6)
-     */
-    protected readonly string $server;
-
-    /**
-     * 服务器端口号
-     */
-    protected readonly int $serverPort;
-
-    /**
-     * 用于加密传输的密码
-     */
-    protected readonly string $password;
-
-    /**
-     * 加密方法
-     *
-     * 推荐使用AEAD加密方式，例如：chacha20-ietf-poly1305或aes-256-gcm
-     */
-    protected readonly string $method;
 
     /**
      * 备注/标签
@@ -45,16 +24,12 @@ abstract class BaseConfig
      * @param string $method 加密方法
      */
     public function __construct(
-        string $server,
-        int $serverPort,
-        string $password = '',
-        string $method = 'chacha20-ietf-poly1305'
+        protected readonly string $server,
+        protected readonly int    $serverPort,
+        protected readonly string $password = '',
+        protected readonly string $method = 'chacha20-ietf-poly1305'
     )
     {
-        $this->server = $server;
-        $this->serverPort = $serverPort;
-        $this->password = $password;
-        $this->method = $method;
     }
 
     /**
@@ -120,6 +95,13 @@ abstract class BaseConfig
     }
 
     /**
+     * 转换为JSON字符串
+     *
+     * @return string
+     */
+    abstract public function toJson(): string;
+
+    /**
      * 获取基础JSON数据数组
      */
     protected function getBaseJsonArray(): array
@@ -137,11 +119,4 @@ abstract class BaseConfig
 
         return $data;
     }
-
-    /**
-     * 转换为JSON字符串
-     *
-     * @return string
-     */
-    abstract public function toJson(): string;
 }

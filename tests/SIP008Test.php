@@ -2,7 +2,9 @@
 
 namespace Shadowsocks\Config\Tests;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use ReflectionProperty;
 use Shadowsocks\Config\ClientConfig;
 use Shadowsocks\Config\ServerConfig;
 use Shadowsocks\Config\SIP002;
@@ -75,7 +77,7 @@ JSON;
 
     public function testFromJsonInvalidFormat(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         SIP008::fromJson('{invalid json}');
     }
 
@@ -86,7 +88,7 @@ JSON;
     "servers": []
 }
 JSON;
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         SIP008::fromJson($json);
     }
 
@@ -97,7 +99,7 @@ JSON;
     "version": 1
 }
 JSON;
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         SIP008::fromJson($json);
     }
 
@@ -263,7 +265,7 @@ JSON;
 
         // 测试相同服务器不同ID会重复添加
         $server4 = clone $server3;
-        $reflectionProperty = new \ReflectionProperty(ServerConfig::class, 'id');
+        $reflectionProperty = new ReflectionProperty(ServerConfig::class, 'id');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($server4, 'different-id-for-test');
 
@@ -300,17 +302,17 @@ JSON;
     public function testFromInvalidJson(): void
     {
         $invalidJson = '{invalid json}';
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         SIP008::fromJson($invalidJson);
     }
 
     public function testFromUrl(): void
     {
         // 这个测试需要模拟HTTP请求，在这里我们只测试URL验证
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         SIP008::fromUrl('invalid-url');
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         SIP008::fromUrl('http://example.com/config.json'); // 不是HTTPS
     }
 
