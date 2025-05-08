@@ -10,10 +10,6 @@
     "phpstan/phpstan": "^2.1",
     "phpunit/phpunit": "^10.0"
   },
-  "scripts": {
-    "phpstan": "phpstan analyse src -l 1",
-    "test": "phpunit"
-  },
   "autoload": {
     "psr-4": {
       "Shadowsocks\\Config\\": "src"
@@ -23,5 +19,9 @@
     "psr-4": {
       "Shadowsocks\\Config\\Tests\\": "tests"
     }
+  },
+  "scripts": {
+    "phpstan": "phpstan analyse src -l 1",
+    "test": "phpunit"
   }
 }
