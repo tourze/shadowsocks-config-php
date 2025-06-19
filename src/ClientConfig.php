@@ -58,7 +58,8 @@ class ClientConfig extends BaseConfig
      */
     public function setTag(?string $tag): self
     {
-        return $this->setRemarks($tag);
+        $this->setRemarks($tag);
+        return $this;
     }
 
     public function toJson(): string
