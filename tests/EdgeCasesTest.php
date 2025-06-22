@@ -15,8 +15,6 @@ class EdgeCasesTest extends TestCase
      */
     public function testSpecialCharacters(): void
     {
-        $this->markTestIncomplete('未完全修复的特殊字符处理测试，稍后修复。');
-
         // 测试包含特殊字符的标签处理
         $specialChars = "Special & 特殊 <> 字符 + 测试 % ! ?";
 

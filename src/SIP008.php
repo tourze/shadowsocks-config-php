@@ -64,7 +64,8 @@ class SIP008
 
         $content = file_get_contents($url, false, $context);
         if ($content === false) {
-            throw new InvalidArgumentException('无法加载SIP008配置: ' . error_get_last()['message'] ?? '未知错误');
+            $error = error_get_last();
+            throw new InvalidArgumentException('无法加载SIP008配置: ' . ($error['message'] ?? '未知错误'));
         }
 
         return self::fromJson($content);

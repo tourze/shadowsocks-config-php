@@ -114,8 +114,8 @@ class SIP002Test extends TestCase
 
         $this->assertEquals('example.org', $config->getServer());
         $this->assertEquals(8389, $config->getServerPort());
-        $this->assertEquals(base64_encode('chacha20-ietf-poly1305:test'), $config->getMethod());
-        $this->assertEquals('', $config->getPassword());
+        $this->assertEquals('chacha20-ietf-poly1305', $config->getMethod());
+        $this->assertEquals('test', $config->getPassword());
         $this->assertNull($config->getTag());
         $this->assertNull($sip002->getPlugin());
     }

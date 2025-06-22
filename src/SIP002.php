@@ -154,7 +154,18 @@ class SIP002
         $password = $parts['pass'] ?? '';
 
         // 尝试Base64解码用户信息
-        $decodedUserInfo = base64_decode($userInfo . (str_contains($userInfo, '=') ? '' : '=='), true);
+        // 首先尝试不带填充的解码
+        $decodedUserInfo = base64_decode($userInfo, true);
+        
+        // 如果解码失败，尝试添加填充
+        if ($decodedUserInfo === false && !str_contains($userInfo, '=')) {
+            // 计算需要的填充数
+            $padding = strlen($userInfo) % 4;
+            if ($padding > 0) {
+                $padding = 4 - $padding;
+                $decodedUserInfo = base64_decode($userInfo . str_repeat('=', $padding), true);
+            }
+        }
 
         // 检查是否为Base64编码的用户信息
         if ($decodedUserInfo !== false && strpos($decodedUserInfo, ':') !== false) {
