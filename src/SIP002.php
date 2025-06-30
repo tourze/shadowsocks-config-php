@@ -2,7 +2,7 @@
 
 namespace Shadowsocks\Config;
 
-use InvalidArgumentException;
+use Shadowsocks\Config\Exception\InvalidConfigException;
 
 /**
  * SIP002 URI格式处理类
@@ -39,19 +39,19 @@ class SIP002
      *
      * @param string $jsonFilePath 配置文件路径
      * @return self
-     * @throws InvalidArgumentException 配置文件不存在或格式错误
+     * @throws InvalidConfigException 配置文件不存在或格式错误
      */
     public static function fromJsonFile(string $jsonFilePath): self
     {
         if (!file_exists($jsonFilePath)) {
-            throw new InvalidArgumentException("配置文件不存在: {$jsonFilePath}");
+            throw new InvalidConfigException("配置文件不存在: {$jsonFilePath}");
         }
 
         $content = file_get_contents($jsonFilePath);
         $config = json_decode($content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new InvalidArgumentException('配置文件JSON格式错误: ' . json_last_error_msg());
+            throw new InvalidConfigException('配置文件JSON格式错误: ' . json_last_error_msg());
         }
 
         $serverConfig = new ClientConfig(
@@ -79,12 +79,12 @@ class SIP002
      *
      * @param string $uri Shadowsocks URI
      * @return self
-     * @throws InvalidArgumentException URI格式错误
+     * @throws InvalidConfigException URI格式错误
      */
     public static function fromUri(string $uri): self
     {
         if (!str_starts_with($uri, 'ss://')) {
-            throw new InvalidArgumentException('无效的Shadowsocks URI，必须以ss://开头');
+            throw new InvalidConfigException('无效的Shadowsocks URI，必须以ss://开头');
         }
 
         // 检查是否是SIP002格式还是标准URI格式
@@ -97,7 +97,7 @@ class SIP002
         $parts = parse_url(substr($uri, 5));
 
         if (!isset($parts['user']) || !isset($parts['host']) || !isset($parts['port'])) {
-            throw new InvalidArgumentException('无效的Shadowsocks URI格式');
+            throw new InvalidConfigException('无效的Shadowsocks URI格式');
         }
 
         $method = $parts['user'];
@@ -119,17 +119,17 @@ class SIP002
      *
      * @param string $uri SIP002 URI
      * @return self
-     * @throws InvalidArgumentException URI格式错误
+     * @throws InvalidConfigException URI格式错误
      */
     public static function fromSIP002Uri(string $uri): self
     {
         if (!str_starts_with($uri, 'ss://')) {
-            throw new InvalidArgumentException('无效的Shadowsocks URI，必须以ss://开头');
+            throw new InvalidConfigException('无效的Shadowsocks URI，必须以ss://开头');
         }
 
         $parts = parse_url($uri);
         if (!isset($parts['host']) || !isset($parts['port'])) {
-            throw new InvalidArgumentException('无效的SIP002 URI格式: 缺少主机或端口');
+            throw new InvalidConfigException('无效的SIP002 URI格式: 缺少主机或端口');
         }
 
         $server = $parts['host'];
@@ -147,7 +147,7 @@ class SIP002
 
         // 解析用户信息
         if (!isset($parts['user'])) {
-            throw new InvalidArgumentException('无效的SIP002 URI格式: 缺少用户信息');
+            throw new InvalidConfigException('无效的SIP002 URI格式: 缺少用户信息');
         }
 
         $userInfo = $parts['user'];
@@ -202,12 +202,12 @@ class SIP002
      *
      * @param string $base64Uri Base64编码的Shadowsocks URI
      * @return self
-     * @throws InvalidArgumentException URI格式错误
+     * @throws InvalidConfigException URI格式错误
      */
     public static function fromBase64Uri(string $base64Uri): self
     {
         if (!str_starts_with($base64Uri, 'ss://')) {
-            throw new InvalidArgumentException('无效的Shadowsocks Base64 URI，必须以ss://开头');
+            throw new InvalidConfigException('无效的Shadowsocks Base64 URI，必须以ss://开头');
         }
 
         $uri = substr($base64Uri, 5);
@@ -222,23 +222,23 @@ class SIP002
         // Base64解码
         $decodedUri = base64_decode($uri);
         if ($decodedUri === false) {
-            throw new InvalidArgumentException('无效的Base64编码');
+            throw new InvalidConfigException('无效的Base64编码');
         }
 
         // 解析标准URI格式
         $parts = explode('@', $decodedUri, 2);
         if (count($parts) !== 2) {
-            throw new InvalidArgumentException('无效的URI格式');
+            throw new InvalidConfigException('无效的URI格式');
         }
 
         $methodPass = explode(':', $parts[0], 2);
         if (count($methodPass) !== 2) {
-            throw new InvalidArgumentException('无效的加密方法和密码格式');
+            throw new InvalidConfigException('无效的加密方法和密码格式');
         }
 
         $hostPort = explode(':', $parts[1], 2);
         if (count($hostPort) !== 2) {
-            throw new InvalidArgumentException('无效的主机和端口格式');
+            throw new InvalidConfigException('无效的主机和端口格式');
         }
 
         $method = $methodPass[0];

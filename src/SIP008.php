@@ -2,7 +2,7 @@
 
 namespace Shadowsocks\Config;
 
-use InvalidArgumentException;
+use Shadowsocks\Config\Exception\InvalidConfigException;
 
 /**
  * SIP008在线配置传递处理类
@@ -39,16 +39,16 @@ class SIP008
      *
      * @param string $url HTTPS URL
      * @return self
-     * @throws InvalidArgumentException 加载配置失败
+     * @throws InvalidConfigException 加载配置失败
      */
     public static function fromUrl(string $url): self
     {
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new InvalidArgumentException('无效的URL');
+            throw new InvalidConfigException('无效的URL');
         }
 
         if (!str_starts_with($url, 'https://')) {
-            throw new InvalidArgumentException('SIP008配置必须通过HTTPS传输');
+            throw new InvalidConfigException('SIP008配置必须通过HTTPS传输');
         }
 
         $context = stream_context_create([
@@ -65,7 +65,7 @@ class SIP008
         $content = file_get_contents($url, false, $context);
         if ($content === false) {
             $error = error_get_last();
-            throw new InvalidArgumentException('无法加载SIP008配置: ' . ($error['message'] ?? '未知错误'));
+            throw new InvalidConfigException('无法加载SIP008配置: ' . ($error['message'] ?? '未知错误'));
         }
 
         return self::fromJson($content);
@@ -76,17 +76,17 @@ class SIP008
      *
      * @param string $jsonContent JSON内容
      * @return self
-     * @throws InvalidArgumentException JSON格式错误
+     * @throws InvalidConfigException JSON格式错误
      */
     public static function fromJson(string $jsonContent): self
     {
         $data = json_decode($jsonContent, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new InvalidArgumentException('SIP008 JSON格式错误: ' . json_last_error_msg());
+            throw new InvalidConfigException('SIP008 JSON格式错误: ' . json_last_error_msg());
         }
 
         if (!isset($data['version']) || !isset($data['servers']) || !is_array($data['servers'])) {
-            throw new InvalidArgumentException('无效的SIP008格式: 缺少必要字段或servers不是数组');
+            throw new InvalidConfigException('无效的SIP008格式: 缺少必要字段或servers不是数组');
         }
 
         $sip008 = new self();
@@ -95,7 +95,7 @@ class SIP008
         foreach ($data['servers'] as $server) {
             if (!isset($server['id']) || !isset($server['server']) || !isset($server['server_port']) ||
                 !isset($server['password']) || !isset($server['method'])) {
-                throw new InvalidArgumentException('无效的服务器配置: 缺少必要字段');
+                throw new InvalidConfigException('无效的服务器配置: 缺少必要字段');
             }
 
             $serverConfig = new ServerConfig(
